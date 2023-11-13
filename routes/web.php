@@ -24,15 +24,20 @@ Route::get('/', function () {
 Auth::routes(['verify' => true]);
 
 Route::middleware('verified')
+    ->get('task/export/{extension}', [TaskController::class, 'export'])->name('task.export');
+Route::middleware('verified')
+    ->get('task/exportPdf', [TaskController::class, 'exportPdf'])->name('task.exportPdf');
+Route::middleware('verified')
     ->resource('/task', TaskController::class);
 
+/*
 Route::get('/message-test', function () {
-    return new MessageTestMail();
-    /*
+    //return new MessageTestMail();
+
     Mail::to('felipe01.sth@gmail.com')->send(new MessageTestMail());
     return 'E-mail enviado com sucesso!';
-    */
 });
+*/
 
 /*
 Route::middleware('verified')

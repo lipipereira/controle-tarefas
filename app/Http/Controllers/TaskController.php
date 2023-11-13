@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TasksExport;
 use App\Mail\NewTaskMail;
 use App\Models\Task;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TaskController extends Controller
 {
@@ -148,5 +151,24 @@ class TaskController extends Controller
 
         $task->delete();
         return redirect()->route('task.index');
+    }
+
+    public function export($extension)
+    {
+        if (in_array($extension, ['xlsx', 'csv', 'pdf'])) {
+            return Excel::download(new TasksExport, 'lista_de_tarefas.' . $extension);
+        }
+        return redirect()->route('task.index');
+    }
+
+    public function exportPdf()
+    {
+        $tasks = Auth::user()->tasks()->get();
+        $pdf = Pdf::loadView('task.pdf', ['tasks' => $tasks]);
+        // Tipo de papel: a4, letter
+        // Orientação: landscape(paisagem), portrait(retrato)
+        $pdf->setPaper('a4', 'landscape');
+        //return $pdf->download('lista_de_tarefas.pdf');
+        return $pdf->stream('lista_de_tarefas.pdf');
     }
 }
