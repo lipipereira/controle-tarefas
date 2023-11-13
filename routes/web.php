@@ -24,10 +24,6 @@ Route::get('/', function () {
 Auth::routes(['verify' => true]);
 
 Route::middleware('verified')
-    ->get('/home', [App\Http\Controllers\HomeController::class, 'index'])
-    ->name('home');
-
-Route::middleware('verified')
     ->resource('/task', TaskController::class);
 
 Route::get('/message-test', function () {
@@ -37,3 +33,9 @@ Route::get('/message-test', function () {
     return 'E-mail enviado com sucesso!';
     */
 });
+
+/*
+Route::middleware('verified')
+    ->get('/home', [App\Http\Controllers\HomeController::class, 'index'])
+    ->name('home');
+*/

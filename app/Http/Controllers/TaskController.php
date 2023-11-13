@@ -19,11 +19,8 @@ class TaskController extends Controller
      */
     public function index()
     {
-        $id = Auth::user()->id;
-        $nome = Auth::user()->name;
-        $email = Auth::user()->email;
-
-        return "ID: $id | Nome: $nome | Email: $email";
+        $tasks = Task::where('user_id', Auth::user()->id)->paginate(8);
+        return view('task.index', ['tasks' => $tasks]);
 
         /*
         if (Auth::check()) {
@@ -79,7 +76,10 @@ class TaskController extends Controller
         ];
         $request->validate($rules, $feedback);
 
-        $task = Task::create($request->all());
+        $data = $request->all();
+        $data['user_id'] = Auth::user()->id;
+
+        $task = Task::create($data);
         $recipient = Auth::user()->email;
 
         Mail::to($recipient)->send(new  NewTaskMail($task));
@@ -99,7 +99,11 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
-        //
+        $user_id = Auth::user()->id;
+        if ($task->id == $user_id) {
+            return view('task.edit', ['task' => $task]);
+        }
+        return view('access-denied');
     }
 
     /**
@@ -107,7 +111,30 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
-        //
+        $rules = [
+            'task' => [
+                'required',
+                'min:5',
+                'max:50'
+            ],
+            'date_limit_completion' => [
+                'required'
+            ]
+        ];
+
+        $feedback = [
+            'required' => 'O :attribute é obriatório',
+            'task.min' => 'Minimo de caracteres é de 5',
+            'task.max' => 'Máximo de caracteres é de 5'
+        ];
+        $request->validate($rules, $feedback);
+
+        $user_id = Auth::user()->id;
+        if ($task->id == $user_id) {
+            $task->update($request->all());
+            return redirect()->route('task.index');
+        }
+        return view('access-denied');
     }
 
     /**
@@ -115,6 +142,11 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
-        //
+        if (!$task->id == Auth::user()->id) {
+            return view('access-denied');
+        }
+
+        $task->delete();
+        return redirect()->route('task.index');
     }
 }

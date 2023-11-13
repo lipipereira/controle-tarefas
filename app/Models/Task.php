@@ -11,6 +11,7 @@ class Task extends Model
 
     protected $fillable = [
         'task',
-        'date_limit_completion'
+        'date_limit_completion',
+        'user_id'
     ];
 }
